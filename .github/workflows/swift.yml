@@ -15,12 +15,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install xtool
-        run: |
-          curl -fL "https://github.com" -o xtool
-          chmod +x xtool
-          sudo mv xtool /usr/local/bin/
-          echo "/usr/local/bin" >> $GITHUB_PATH
+      - name: Setup xtool Compiler
+        uses: xtool-org/setup-xtool@v1
 
       - name: Verify xtool Installation
         run: xtool --version
