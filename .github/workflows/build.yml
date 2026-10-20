@@ -1,0 +1,38 @@
+name: iOS Build Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install xtool
+        run: |
+          curl -fL "https://github.com" -o xtool
+          chmod +x xtool
+          sudo mv xtool /usr/local/bin/
+          echo "/usr/local/bin" >> $GITHUB_PATH
+
+      - name: Verify xtool Installation
+        run: xtool --version
+
+      - name: Compile iOS IPA Build Binary
+        run: |
+          # Note: Since the checkout happens at the root,
+          # and our project files are in the root, we run directly.
+          xtool dev build --ipa
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: TimeSecondsDisplayer-Build
+          path: build/*.ipa

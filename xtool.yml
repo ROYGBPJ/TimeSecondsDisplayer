@@ -1,0 +1,6 @@
+version: 1
+bundleID: com.tidwe.TimeSecondsDisplayer
+product: TimeSecondsDisplayer
+extensions:
+  - product: TimeSecondsWidget
+    infoPath: TimeSecondsWidget-Info.plist
