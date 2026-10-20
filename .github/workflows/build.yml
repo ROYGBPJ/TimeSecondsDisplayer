@@ -2,9 +2,9 @@ name: iOS Build Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,8 @@ jobs:
 
       - name: Install xtool
         run: |
-          curl -fL "https://github.com" -o xtool
+          curl -fL "https://github.com" -o xtool.tar.gz
+          tar -xzf xtool.tar.gz
           chmod +x xtool
           sudo mv xtool /usr/local/bin/
           echo "/usr/local/bin" >> $GITHUB_PATH
@@ -27,8 +28,6 @@ jobs:
 
       - name: Compile iOS IPA Build Binary
         run: |
-          # Note: Since the checkout happens at the root,
-          # and our project files are in the root, we run directly.
           xtool dev build --ipa
 
       - name: Upload Build Artifacts
