@@ -1,0 +1,32 @@
+name: iOS Build Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup xtool Compiler
+        uses: xtool-org/setup-xtool@v1
+
+      - name: Verify xtool Installation
+        run: xtool --version
+
+      - name: Compile iOS IPA Build Binary
+        run: |
+          xtool dev build --ipa
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: TimeSecondsDisplayer-Build
+          path: build/*.ipa
