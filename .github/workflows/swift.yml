@@ -15,10 +15,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup xtool Compiler
-        uses: xtool-org/setup-xtool@v1
+      - name: Install Native xtool Compiler
+        run: |
+          set -euxo pipefail
+          curl -fL "https://github.com/xtool-org/xtool/releases/latest/download/xtool.app.zip" -o xtool.app.zip
+          unzip -q xtool.app.zip
+          chmod +x xtool.app/Contents/MacOS/xtool
+          sudo cp xtool.app/Contents/MacOS/xtool /usr/local/bin/xtool
+          echo "/usr/local/bin" >> "$GITHUB_PATH"
 
-      - name: Verify xtool Installation
+      - name: Verify xtool Toolchain
         run: xtool --version
 
       - name: Compile iOS IPA Build Binary
