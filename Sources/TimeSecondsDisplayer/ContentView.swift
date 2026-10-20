@@ -1,14 +1,18 @@
 import SwiftUI
 
 // --- Luxury Theme Definition ---
-struct LuxuryTheme: Identifiable {
-    let id = UUID()
+struct LuxuryTheme: Identifiable, Equatable {
+    let id: String
     let name: String
     let bgStart: Color
     let bgEnd: Color
     let accent: Color
     let accentGlow: Color
     let secondary: Color
+
+    static func == (lhs: LuxuryTheme, rhs: LuxuryTheme) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
 class ThemeManager: ObservableObject {
@@ -24,6 +28,7 @@ class ThemeManager: ObservableObject {
 
 extension LuxuryTheme {
     static let obsidian = LuxuryTheme(
+        id: "obsidian",
         name: "Obsidian",
         bgStart: Color(hex: "0A0A0C"),
         bgEnd: Color(hex: "1C1E"),
@@ -32,26 +37,29 @@ extension LuxuryTheme {
         secondary: .white
     )
     static let cyberpunk = LuxuryTheme(
+        id: "cyberpunk",
         name: "Cyberpunk",
         bgStart: Color(hex: "0D0221"),
         bgEnd: Color(hex: "240046"),
-        accent: Color(hex: "39FF14"), // Neon Green
+        accent: Color(hex: "39FF14"),
         accentGlow: Color(hex: "39FF14"),
         secondary: .white
     )
     static let roseGold = LuxuryTheme(
+        id: "roseGold",
         name: "Rose Gold",
         bgStart: Color(hex: "1A0F0F"),
         bgEnd: Color(hex: "2D1B1B"),
-        accent: Color(hex: "B76E79"), // Rose Gold
+        accent: Color(hex: "B76E79"),
         accentGlow: Color(hex: "FFB7C5"),
         secondary: .white
     )
     static let titanium = LuxuryTheme(
+        id: "titanium",
         name: "Titanium",
         bgStart: Color(hex: "2C2C2C"),
         bgEnd: Color(hex: "4A4A4A"),
-        accent: Color(hex: "E5E4E2"), // Platinum/Titanium
+        accent: Color(hex: "E5E4E2"),
         accentGlow: .white,
         secondary: Color(hex: "A9A9A9")
     )
@@ -63,7 +71,6 @@ struct ContentView: View {
     @State private var pulseAmount = 0.0
     @State private var showSettings = false
 
-    // Custom Settings
     @State private var ringSpeed: Double = 1.0
     @State private var glowIntensity: Double = 1.0
 
@@ -71,7 +78,6 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Background: Theme-driven Gradient
             LinearGradient(
                 gradient: Gradient(colors: [themeManager.currentTheme.bgStart, themeManager.currentTheme.bgEnd]),
                 startPoint: .topLeading,
@@ -81,7 +87,6 @@ struct ContentView: View {
             .animation(.easeInOut(duration: 0.8), value: themeManager.currentTheme)
 
             VStack(spacing: 40) {
-                // Header / Settings Toggle
                 HStack {
                     Spacer()
                     Button(action: { withAnimation(.spring()) { showSettings.toggle() } }) {
@@ -97,9 +102,7 @@ struct ContentView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
 
-                // Core Display
                 ZStack {
-                    // Rotating Ambient Outer Ring
                     Circle()
                         .trim(from: 0, to: CGFloat(currentTime.second) / 60.0)
                         .stroke(
@@ -114,7 +117,6 @@ struct ContentView: View {
                         .frame(width: 280, height: 280)
                         .shadow(color: themeManager.currentTheme.accent.opacity(0.6), radius: 15 * glowIntensity)
 
-                    // Neon Outer Glow Pulse
                     Circle()
                         .stroke(themeManager.currentTheme.accent.opacity(0.2), lineWidth: 2)
                         .frame(width: 270, height: 270)
@@ -136,7 +138,6 @@ struct ContentView: View {
                 }
                 .padding(.vertical, 60)
 
-                // Glassmorphism Theme Picker
                 VStack(spacing: 15) {
                     Text("LUXURY STYLE")
                         .font(.system(size: 10, weight: .bold, design: .monospaced))
@@ -169,7 +170,6 @@ struct ContentView: View {
         .overlay(settingsOverlay)
     }
 
-    // --- Animated Settings Menu ---
     @ViewBuilder
     var settingsOverlay: some View {
         if showSettings {
@@ -265,21 +265,23 @@ extension Color {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
-        let r, g, b: UInt64
+
+        let r, g, b, a: UInt64
         switch hex.count {
-        case 6: // RGB (24-bit)
-            (r, g, b) = ( (int >> 16) & 0xFF, (int >> 8) & 0xFF, int & 0xFF )
-        case 8: // RGB(A) (32-bit)
-            (r, g, b) = ( (int >> 24) & 0xFF, (int >> 16) & 0xFF, (int >> 8) & 0xFF )
+        case 6:
+            (r, g, b, a) = ((int >> 16) & 0xFF, (int >> 8) & 0xFF, int & 0xFF, 255)
+        case 8:
+            (r, g, b, a) = ((int >> 24) & 0xFF, (int >> 16) & 0xFF, (int >> 8) & 0xFF, int & 0xFF)
         default:
-            (r, g, b) = (128, 128, 128)
+            (r, g, b, a) = (128, 128, 128, 255)
         }
+
         self.init(
             .sRGB,
             red: Double(r) / 255,
             green: Double(g) / 255,
             blue: Double(b) / 255,
-            opacity: 1.0
+            opacity: Double(a) / 255
         )
     }
 }
